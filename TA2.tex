@@ -1,0 +1,375 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{lipsum}
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-2: ADA Winter-2024}
+\author{Akshat Kothari (2022053) \and Adarsh Jha (2022024)}
+
+\date{08 February 2024}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing}
+
+In this section, we outline the steps taken before implementing the dynamic programming solution and the brute-force approach. These steps include generating random input data for the obstacle course.
+
+\subsection{Input Generation}
+
+To simulate different scenarios, we generate a list of random integers representing the rewards and penalties at each booth. The generated list, denoted as \texttt{large\_input}, is used as the input array for both the dynamic programming and brute-force solutions.
+
+\begin{algorithm}
+\caption{Random Input Generation}\label{input-generation}
+\begin{algorithmic}[1]
+\For{$i$ in range($\text{MAX\_N}$)}
+    \State $\text{large\_input}[i] \gets \text{RandomInteger}(-100, 100)$ \Comment{Generate a random integer between -100 and 100}
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+The resulting \texttt{large\_input} array represents the numerical values associated with each booth in the obstacle course.
+
+\subsection{Memoization Arrays}
+
+To optimize the dynamic programming solution, we use memoization arrays (\texttt{Ring} and \texttt{Ding}) to store previously calculated results. These arrays prevent redundant computations and improve the overall efficiency of the algorithm.
+
+\section{Algorithm Description}
+
+\subsection{Dynamic Programming Algorithm}
+
+The dynamic programming algorithm maximizes Mr. Fox's chicken earnings while adhering to specific rules at each booth. It employs the following:
+
+1. **Subproblem Definition:**
+
+    \subsubsection{\(k\)th Element is Either 'RING' or 'DING'}
+There are two cases to consider:
+\begin{enumerate}
+    \item When booth \(k\) is labeled 'RING':
+    \begin{itemize}
+    \item \(RDDDRR\): \(Ring(k-5) - large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k]\)
+    \item \(RDDRR\): \(Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k]\)
+    \item \(RDDDR\): \(Ring(k-4) - large\_input[k-3] - large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+    \item \(RDDR\): \(Ring(k-3) - large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+    \item \(RDRR\): \(Ring(k-3) - large\_input[k-2] + large\_input[k-1] + large\_input[k]\)
+    \item \(DRRR\): \(Ding(k-3) + large\_input[k-2] + large\_input[k-1] + large\_input[k]\)
+    \item \(DRRDR\): \(Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+    \item \(DRRRDR\): \(Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+    \item \(DRDR\): \(Ding(k-3) + large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+\end{itemize}
+
+
+    \item When booth \(k\) is labeled 'DING':
+        \begin{itemize}
+            \item \(DRRRDD\): \(Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k]\)
+    \item \(DRRDD\): \(Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k]\)
+    \item \(DRRRD\): \(Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k]\)
+    \item \(DRRD\): \(Ding(k-3) + large\_input[k-2] + large\_input[k-1] - large\_input[k]\)
+    \item \(DRDD\): \(Ding(k-3) + large\_input[k-2] - large\_input[k-1] - large\_input[k]\)
+    \item \(RDDD\): \(Ring(k-3) - large\_input[k-2] - large\_input[k-1] - large\_input[k]\)
+    \item \(RDDRD\): \(Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k]\)
+    \item \(RDDDRD\): \(Ring(k-5) -large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k]\)
+    \item \(RDRD\): \(Ring(k-3) - large\_input[k-2] + large\_input[k-1] - large\_input[k]\)
+        \end{itemize}
+    \end{enumerate}
+ - Given an index $i$, the subproblem is to find the maximum value $m_{\text{sub}}$ for the subarray $large\_input[0..i]$ such that    the calculation involves selecting elements from this subarray and possibly considering the optimal solution for smaller subarrays (i.e., $large\_input[0..i-1]$, $large\_input[0..i-2]$, and so on).
+
+ - In other words, the subproblem is to find the optimal solution for a smaller subarray and use it to compute the optimal solution for the current subarray ending at index $i$.
+
+ -  The recursive nature of the original function suggests that solving these smaller subproblems will eventually lead to the solution for the original problem. The memoization aspect of the code, with the $Ring$ array, indicates that solutions to subproblems are stored and reused to avoid redundant computations.
+
+
+
+    
+
+
+2. **Implementation:**
+   - Recursive functions \texttt{ding} and \texttt{ring} compute rewards for 'DING' and 'RING' choices.
+   - Memoization using \texttt{Ring} and \texttt{Ding} arrays avoids redundant calculations.
+
+\subsection{Brute-Force Approach}
+
+A brute-force approach explores all valid combinations to maximize chicken earnings, adhering to the specified rules.
+
+1. **Constraints:**
+   - Counters ensure at most three consecutive occurrences of the same word.
+
+2. **Implementation:**
+   - The \texttt{bootforce} function explores choices at each booth, considering penalties and rewards.
+
+
+
+
+
+
+
+\section{Recurrence Relation}
+
+\subsection{Subproblem Definition}
+
+\subsubsection{\(k\)th Element is Ring}
+    So there are only 9 cases from there:
+    RDDDRR
+    RDDRR
+    RDDDR
+    RDDR
+    RDRR
+    DRRR
+    DRRDR
+    DRRRDR
+    DRDR
+
+\subsubsection{\(k\)th Element is Ding}
+    DRRRDD
+    DRRDD
+    DRRRD
+    DRRD
+    DRDD
+    RDDD
+    RDDRD
+    RDDDRD
+    RDRD
+
+\subsection{Recurrence of Subproblems}
+
+For \(k \geq 0\), the recurrence relation for the 'RING' cases is given by:
+\[
+\begin{align*}
+    RDDDRR & : Ring(k-5) - large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+    RDDRR & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+    RDDDR & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+    RDDR & : Ring(k-3) - large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+    RDRR & : Ring(k-3) - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+    DRRR & : Ding(k-3) + large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+    DRRDR & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+    DRRRDR & : Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+    DRDR & : Ding(k-3) + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+\end{align*}
+\]
+
+For \(k \geq 0\), the recurrence relation for the 'DING' cases is given by:
+\[
+\begin{align*}
+    DRRRDD & : Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+    DRRDD & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+    DRRRD & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+    DRRD & : Ding(k-3) + large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+    DRDD & : Ding(k-3) + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+    RDDD & : Ring(k-3) - large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+    RDDRD & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+    RDDDRD & : Ring(k-5) - large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+    RDRD & : Ring(k-3) - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+\end{align*}
+\]
+
+\subsection{Specific Subproblems}
+
+The specific subproblems that solve the final problem are \(Ring(n)\) and \(Ding(n)\), where \(n\) is the total number of booths.
+
+\subsection{Algorithm Description}
+
+The algorithm uses dynamic programming to compute the maximum number of chickens Mr. Fox can earn by running the obstacle course. It is divided into two recursive functions, \(Ring(k)\) and \(Ding(k)\), which represent the maximum reward at booth \(k\) considering that booth \(k\) is labeled 'RING' or 'DING', respectively.
+
+The recurrence relations for both 'RING' and 'DING' cases are defined based on the maximum reward obtained at the previous booths. The algorithm uses memoization to store the results of subproblems and avoid redundant calculations.
+
+\subsection{Running Time Analysis}
+
+The running time of the algorithm is polynomial in \(n\), the total number of booths. The memoized recursive approach ensures that each subproblem is solved only once, leading to an efficient computation of the maximum chicken rewards. The time complexity is determined by the number of distinct subproblems, which is polynomial, making the algorithm efficient for large input sizes.
+\section{Complexity Analysis}
+
+\subsection{Time Complexity}
+
+The time complexity is determined by the number of subproblems solved and the time required to solve each subproblem. Let \(n\) be the total number of booths.
+
+\subsubsection{Solving Subproblems:}
+For each booth \(k\), there are constant-time operations involved in evaluating the recurrence relations for both 'RING' and 'DING' cases. The recurrence relations are solved using memoization, ensuring that each subproblem is computed only once. As a result, the number of distinct subproblems is \(O(n)\), leading to a linear number of recursive calls.
+
+\subsubsection{Time to Solve Each Subproblem:}
+The time to solve each subproblem is constant, involving basic arithmetic operations and comparisons. Therefore, the overall time complexity is \(O(n)\).
+
+\subsection{Recurrence Relations}
+
+\subsubsection{For 'RING' Cases:}
+\begin{align*}
+   RDDDRR & : Ring(k-5) - large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+   RDDRR & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+   RDDDR & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+   RDDR & : Ring(k-3) - large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+   RDRR & : Ring(k-3) - large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+   DRRR & : Ding(k-3) + large\_input[k-2] + large\_input[k-1] + large\_input[k] \\
+   DRRDR & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+   DRRRDR & : Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+   DRDR & : Ding(k-3) + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+\end{align*}
+
+\subsubsection{For 'DING' Cases:}
+\begin{align*}
+   DRRRDD & : Ding(k-5) + large\_input[k-4] + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+   DRRDD & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+   DRRRD & : Ding(k-4) + large\_input[k-3] + large\_input[k-2] - large\_input[k-1] + large\_input[k] \\
+   DRRD & : Ding(k-3) + large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+   DRDD & : Ding(k-3) + large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+   RDDD & : Ring(k-3) - large\_input[k-2] - large\_input[k-1] - large\_input[k] \\
+   RDDRD & : Ring(k-4) - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+   RDDDRD & : Ring(k-5) - large\_input[k-4] - large\_input[k-3] - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+   RDRD & : Ring(k-3) - large\_input[k-2] + large\_input[k-1] - large\_input[k] \\
+\end{align*}
+
+\subsection{Recurrence Relation for Time Complexity with Memoization}
+
+The recurrence relation for the time complexity \(T(n)\) with memoization, where each subproblem is solved only once, can be expressed as:
+
+\begin{align*}
+T(n) = T(n-3) + T(n-4) + T(n-5) + O(1)
+\end{align*}
+
+This relation indicates that the time complexity at booth \(n\) is a sum of the time complexities at booths \(n-3\), \(n-4\), and \(n-5\), along with a constant time complexity for the operations performed at booth \(n\).
+
+Additionally, the use of memoization ensures that each subproblem is solved only once, leading to a very short time for each operation. This significantly reduces redundant calculations and improves the overall efficiency of the algorithm.
+
+
+
+
+
+
+
+
+\section{Proof of Correctness}
+
+\subsection{Proof Outline for 'RING' Cases}
+
+\begin{enumerate}
+    \item \textbf{Base Case:} \\
+        For the base case where \(k < 0\), the algorithm returns 0, which is correct as there are no booths.
+        
+    \item \textbf{Inductive Step:} \\
+        Assume that the algorithm correctly calculates the maximum reward for booths \(0\) to \(k-1\).
+        
+    \item \textbf{Case Analysis:} \\
+        The algorithm considers various cases based on the labeling of booth \(k\) as 'RING'. For each case, the algorithm calculates the maximum reward by considering the optimal choices for the previous booths (\(k-2\), \(k-3\), \(k-4\), \(k-5\)).
+        
+    \item \textbf{Memoization:} \\
+        The algorithm uses memoization to store and reuse the solutions for subproblems, ensuring that each subproblem is solved only once.
+        
+    \item \textbf{Optimal Substructure:} \\
+        The optimal solution for the current problem depends on the optimal solutions for smaller subproblems, demonstrating optimal substructure.
+\end{enumerate}
+
+\subsection{Proof Outline for 'DING' Cases}
+
+\begin{enumerate}
+    \item \textbf{Base Case:} \\
+        Similar to the 'RING' cases, the base case for \(k < 0\) returns 0.
+        
+    \item \textbf{Inductive Step:} \\
+        Assume the algorithm correctly calculates the maximum reward for booths \(0\) to \(k-1\).
+        
+    \item \textbf{Case Analysis:} \\
+        The algorithm considers various cases based on the labeling of booth \(k\) as 'DING'. It calculates the maximum reward by considering optimal choices for the previous booths (\(k-2\), \(k-3\), \(k-4\), \(k-5\)).
+        
+    \item \textbf{Memoization:} \\
+        The algorithm utilizes memoization to store and reuse solutions for subproblems.
+        
+    \item \textbf{Optimal Substructure:} \\
+        The optimal solution for the current problem depends on optimal solutions for smaller subproblems, demonstrating optimal substructure.
+\end{enumerate}
+
+\subsection{Overall Correctness}
+
+By proving the correctness of both 'RING' and 'DING' cases individually and demonstrating that the algorithm correctly combines them, we establish the overall correctness of the algorithm.
+
+
+\section{Assumptions}
+
+\section{Assumptions}
+
+\begin{itemize}
+    \item \textbf{Array Input:} The input array \(A[1, 2, \ldots, n]\) is assumed to be provided as the input to the algorithm.
+    
+    \item \textbf{Numeric Values:} The values in the array \(A\) are assumed to be integers, both positive and negative, including zero.
+    
+    \item \textbf{Farmers' Response:} The consequence of violating rules or ending the obstacle course owing chickens is assumed to result in the farmers shooting Mr. Fox, as stated in the problem.
+\end{itemize}
+
+These assumptions serve as the foundation for the algorithm design and its correctness under the specified problem constraints.
+
+
+\section{Pseudo code}
+\begin{center}
+\Huge On next PAGE
+\end{center}
+
+\vfill
+
+
+\begin{algorithm}
+\caption{Optimal Chicken Earning Algorithm}
+\begin{algorithmic}[1]
+
+\Procedure{OptimalEarning}{$A[1, 2, \ldots, n]$}
+    \State Initialize arrays $Ring[1, 2, \ldots, n]$ and $Ding[1, 2, \ldots, n]$ with zeros
+    \For{$k \gets 1$ to $n$}
+        \State $Ring[k] \gets \Call{ComputeRingReward}{k, A, Ring}$
+        \State $Ding[k] \gets \Call{ComputeDingReward}{k, A, Ding}$
+    \EndFor
+    \State $result \gets \max(Ring[n], Ding[n])$
+    \State \Return $result$
+\EndProcedure
+
+\Procedure{ComputeRingReward}{$k, A, Ring$}
+    \If{$k < 0$}
+        \State \Return $0$
+    \ElsIf{$Ring[k] \neq 0$}
+        \State \Return $Ring[k]$
+    \Else
+        \State $a1 \gets (k \geq 0) ? A[k] : 0$
+        \State $a2 \gets (k - 1 \geq 0) ? A[k - 1] : 0$
+        \State $a3 \gets (k - 2 \geq 0) ? A[k - 2] : 0$
+        \State $a4 \gets (k - 3 \geq 0) ? A[k - 3] : 0$
+        \State $a5 \gets (k - 4 \geq 0) ? A[k - 4] : 0$
+        \State $m \gets \max(\Call{ComputeRingReward}{k - 5, A, Ring} - a5 - a4 - a3 + a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 4, A, Ring} - a4 - a3 + a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 4, A, Ring} - a4 - a3 - a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 3, A, Ring} - a3 - a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 3, A, Ring} - a3 + a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 3, A, Ding} + a3 + a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 4, A, Ding} + a4 + a3 - a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 5, A, Ding} + a5 + a4 + a3 - a2 + a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 3, A, Ding} + a3 - a2 + a1)$
+        \State $Ring[k] \gets m$
+        \State \Return $m$
+    \EndIf
+\EndProcedure
+
+\Procedure{ComputeDingReward}{$k, A, Ding$}
+    \If{$k < 0$}
+        \State \Return $0$
+    \ElsIf{$Ding[k] \neq 0$}
+        \State \Return $Ding[k]$
+    \Else
+        \State $a1 \gets (k \geq 0) ? A[k] : 0$
+        \State $a2 \gets (k - 1 \geq 0) ? A[k - 1] : 0$
+        \State $a3 \gets (k - 2 \geq 0) ? A[k - 2] : 0$
+        \State $a4 \gets (k - 3 \geq 0) ? A[k - 3] : 0$
+        \State $a5 \gets (k - 4 \geq 0) ? A[k - 4] : 0$
+        \State $m \gets \max(\Call{ComputeDingReward}{k - 5, A, Ding} + a5 + a4 + a3 - a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 4, A, Ding} + a4 + a3 - a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 4, A, Ding} + a4 + a3 + a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 3, A, Ding} + a3 + a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeDingReward}{k - 3, A, Ding} + a3 - a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 3, A, Ring} - a3 - a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 4, A, Ring} - a4 - a3 + a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 5, A, Ring} - a5 - a4 - a3 + a2 - a1,$
+        \State \hspace{1.5em} $\Call{ComputeRingReward}{k - 3, A, Ring} - a3 + a2 - a1)$
+        \State $Ding[k] \gets m$
+        \State \Return $m$
+    \EndIf
+\EndProcedure
+
+\end{algorithmic}
+\end{algorithm}
+\end{document}

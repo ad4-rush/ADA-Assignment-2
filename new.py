@@ -59,10 +59,12 @@ def ring(k):
 
 
 def bootforce(k, ringcounter, dingcounter):
-    if ringcounter >= 4 or dingcounter >= 4:
-        return -2147483646
     if k < 0:
         return 0
+    if ringcounter+1>3:
+        return bootforce(k - 1, 0, dingcounter + 1) - large_input[k]
+    if dingcounter+1>3:
+        return bootforce(k - 1, ringcounter + 1, 0) + large_input[k]
     return max(
         bootforce(k - 1, ringcounter + 1, 0) + large_input[k],
         bootforce(k - 1, 0, dingcounter + 1) - large_input[k]
@@ -71,7 +73,7 @@ def bootforce(k, ringcounter, dingcounter):
 # Dynamic programming solution
 start_time = time.time()
 # Generate a list of 10,000 random integers between -100 and 100
-large_input = [random.randint(-100, 100) for _ in range(30)]
+large_input = [random.randint(-100, 100) for _ in range(10)]
 # Memoization arrays for caching results
 Ring = [0] * len(large_input)
 Ding = [0] * len(large_input)
